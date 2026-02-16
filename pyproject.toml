@@ -1,0 +1,4 @@
+[project]
+name = "Code Cleaner"
+version = "0.1.0"
+dependencies = ["pytest"]
