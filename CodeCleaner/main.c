@@ -125,5 +125,5 @@ static inline size_t Hashmap_getThreshold(Hashmap * map)
 // 6. Right now, it just adds elements even if they already exits. Write an alternative set method that only adds an 
 // element if it isn't set already
 
-/* Improvement 6 - Done */ // Along with not adding an element, the value of that element gets overwritten
+Hey there!/* Improvement 6 - Done */ // Along with not adding an element, the value of that element gets overwritten
 

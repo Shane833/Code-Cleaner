@@ -11,9 +11,20 @@ import sys
 # So I would have to identify if the given line contains only a new line
 # or does it really contain any actual data
 # PROBLEM : The last line is not getting formatted right missing bracket (FIXED)
+# It was iterating to one less than the available indices in the file
 
 
 # TODO 2 : To handle multi-line strings 👈
+
+# Question : What if we have embedded comments like a single line comments in multiline comment or
+# vice-versa❓
+# Question: What about both type of comments on the same line❓
+
+# 💡New Idea : Instead of going through each line and modifying it right there
+#  We can tokenize it like the lexer does, so we can store the line no. and
+#  the index of the comments and just make the changes in the those lines
+#  modify them and then write them all into a new file with the applied changes
+
 # TODO 3 : To be able to be able to perform the changes in the same file or just generate a new single file
 # TODO 4 : To be able to identify the language of the file from its extension
 # TODO 5 : To take input along with file, the line no. start/range you would like to clean up
@@ -42,7 +53,8 @@ def format_code(file):
 				temp_file.flush()
 
 				offset = 0
-				while is_empty_line(lines[i+offset]):
+				while (i + offset) < len(lines) and is_empty_line(lines[i+offset]):
+					# Need to make sure i + offset is within range
 					offset += 1
 
 				i = i + offset
@@ -52,15 +64,11 @@ def format_code(file):
 				temp_file.flush()
 				i += 1
 
-			#if line != '\n':
-			#print(line,end="")
-			#print("empty? : ", is_empty_line(line))
-
 		new_file.close()
 		temp_file.close()
 		
-	
 
+def 
 
 def remove_comments(file):
 	with open("temp.c",mode="w+") as new_file:
@@ -73,6 +81,7 @@ def remove_comments(file):
 			i = line.find('//')
 			if i != -1:
 				new_line = line[:i]
+				# Now I can search the
 				new_line = f"{new_line}\n"# explicitely append a new line characterat the end
 			else:
 				# Handling multi line comments
@@ -84,6 +93,19 @@ def remove_comments(file):
 				if i != -1:
 					print(f"FOUND A MULTILINE COMMENT",)
 					print(line,end="")
+					# Now lets find if the same line has */ string
+					j = line.find('*/')
+					if j != -1: # actually found the end of the multiline comment
+						print(f"FOUND THE END OF THE MULTILINE COMMENT")
+						# If its on the same line we can slice through it
+						temp_line1 = line[:i]
+						temp_line2 = line[j+2:]
+						print("START LINE : ", temp_line1)
+						print("END LINE : ", temp_line2)
+					else:
+						pass
+				else:
+					pass
 			
 			new_file.write(new_line)
 			new_file.flush()
