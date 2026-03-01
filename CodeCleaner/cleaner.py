@@ -29,6 +29,8 @@ import sys
 # TODO 4 : To be able to identify the language of the file from its extension
 # TODO 5 : To take input along with file, the line no. start/range you would like to clean up
 # TODO 6 : Add regular expression for multiple files
+# TODO 7 : To add command line options while specifying files to either make the changes in the files 
+#		   or generate a new file (default behaviour) 
 
 def is_empty_line(line) -> bool:
 	# go through the line and determines if its just for formatting
