@@ -1,4 +1,4 @@
 [project]
-name = "CodeCleaner"
+name = "rmcomm"
 version = "0.1.0"
 dependencies = ["pytest"]
