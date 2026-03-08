@@ -1,4 +1,4 @@
-from CodeCleaner.parser import Parser
+from parser import Parser
 import sys
 
 def main():
