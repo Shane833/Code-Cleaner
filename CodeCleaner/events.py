@@ -21,19 +21,29 @@ class Event(object):
         IN_STRING = 2
         IN_MULTI_LINE_COMM = 3
         
-    def __init__(self):
+    def __init__(self,single_comm_marker,multi_line_comm_start_marker, 
+                 multi_line_comm_end_marker):
         self.state = Event.State.DEFAULT # used to monitor when inside string we ignore scanning
+        # TODO : Allowing different types of comments to be processed
+        self.comment_markers = {Token.SINGLE_COMM : single_comm_marker,
+                                Token.MULTI_LINE_COMM_START : multi_line_comm_start_marker,
+                                Token.MULTI_LINE_COMM_END : multi_line_comm_end_marker}
+    '''
+    def __init__(self):
+        self.state = Event.State.DEFAULT # used to monitor when inside multiline comm or string
+    '''
 
     def is_empty_line(self,line) -> bool:
         '''go through the line and determines if its just for formatting'''
         return line.strip() == "" # simple way, i.e. after removing all the whitespace if we are left with nothing then its an empty line
 
+    #TODO: The function name doesn't suggest what it really does
     def peek_and_match(self, index, line, marker) -> bool:
         # since at the end of the file a new line char is always present
         # so it means I don't have to worry about index out of bound error
         # But there was a bug bcz I didn't handle the when we start reaching
         # the end of line and encounter 
-        return line[index+1] == marker if index + 1 < len(line) else False 
+        return line[index + 1] == marker if index + 1 < len(line) else False 
 
     def scanline(self, line) -> list[tuple[int, Token]]:
         tokens = []
@@ -81,3 +91,56 @@ class Event(object):
 
         return token_table
         
+
+    # Function to match characters
+    def match_token(self, line, idx, marker) -> int:
+        if marker is None:
+            return idx
+
+        line_length = len(line)
+        marker_length = len(marker)
+
+        if idx + (marker_length - 1) >= line_length: # subtract 1 to convert size to index
+            #print("Index Out of Bounds")
+            return idx
+        else:
+            for i in range(0, marker_length):
+                if line[idx + i] != marker[i]:
+                    #print("Char didn't match")
+                    return idx
+        
+        return idx + marker_length
+
+    # Function 
+    def scanTokens(self, line):
+        idx = 0
+        tokens = []
+        single_comm_found = False # Flag for breaking out of the loop
+
+        while idx < len(line):
+            token_found = False
+            for token, marker in self.comment_markers.items():
+                new_idx = self.match_token(line, idx, marker) # generates a new index after skipping chars
+                if idx != new_idx:
+                    if self.state == Event.State.DEFAULT:
+                        if token == Token.MULTI_LINE_COMM_START:
+                            self.state = Event.State.IN_MULTI_LINE_COMM
+                            tokens.append((idx, token))
+                        elif token == Token.SINGLE_COMM:
+                            tokens.append((idx, token))
+                            single_comm_found = True
+                    elif self.state == Event.State.IN_MULTI_LINE_COMM:
+                        if token == Token.MULTI_LINE_COMM_END:
+                            tokens.append((idx, token))
+                            self.state = Event.State.DEFAULT
+
+                    idx = new_idx # update to new index when tokens are matched 
+                    token_found = True
+                    break
+
+            if single_comm_found: # We break out of the loop the moment we find a single line comment
+                break
+            if not token_found:
+                idx += 1 # increment loop if no token matched
+
+        return tokens

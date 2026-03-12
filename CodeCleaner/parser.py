@@ -1,4 +1,4 @@
-from events import Event, Token
+from CodeCleaner.events import Event, Token
 from enum import Enum
 
 class Parser(object):

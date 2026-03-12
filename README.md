@@ -18,3 +18,5 @@ A simple CLI tool for removing comments from source code
 - [ ] Add multi-language support
 - [ ] To take input along with file, the line no. start/range you would like to clean up
 - [ ] Add regular expression for multiple files and recursion for a directory
+- [ ] Add multithreading to simultaneously handle multiple files
+- [ ] Add support for dumping the commments into a separate file

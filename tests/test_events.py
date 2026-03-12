@@ -2,51 +2,9 @@ import sys
 import pytest
 from CodeCleaner.events import *
 
+'''
 # creating an object of event
 event = Event()
-
-'''
-def test_empty_line():
-    lines = ["\t\n","int a","      ", "         {"]
-    assert event.is_empty_line(lines[0]) == True   
-    assert event.is_empty_line(lines[1]) == False
-    assert event.is_empty_line(lines[2]) == True
-    assert event.is_empty_line(lines[3]) == False
-
-def test_single_comm():
-    lines = ["//","int a; // This is a variable","\t\t\n","// * Hey // there\t\t",
-             "/* // */","#include <stdio.h>\n"]
-    assert event.has_single_comm(lines[0],'//') != -1
-    assert event.has_single_comm(lines[1],'//') != -1
-    assert event.has_single_comm(lines[2],'//') == -1
-    assert event.has_single_comm(lines[3],'//') != -1
-    assert event.has_single_comm(lines[4],'//') != -1
-    assert event.has_single_comm(lines[5],'//') == -1
-
-def test_multi_line_comm_start():
-    lines = ["/**/","float b; /* multi line comm","// /* // */",
-             "int main{/* This is the main function */","/* */ //",
-             "\t\t\n","int a"]
-    assert event.has_multi_line_comm_start(lines[0],"/*") != -1
-    assert event.has_multi_line_comm_start(lines[1],"/*") != -1
-    assert event.has_multi_line_comm_start(lines[2],"/*") != -1
-    assert event.has_multi_line_comm_start(lines[3],"/*") != -1
-    assert event.has_multi_line_comm_start(lines[4],"/*") != -1
-    assert event.has_multi_line_comm_start(lines[5],"/*") == -1
-    assert event.has_multi_line_comm_start(lines[6],"/*") == -1
-
-def test_multi_line_comm_end():
-    lines = ["/**/","float b; /* multi line comm","// /* // */",
-             "int main{/* This is the main function */","/* */ //",
-             "\t\t\n","int a"]
-    assert event.has_multi_line_comm_end(lines[0],"*/") != -1
-    assert event.has_multi_line_comm_end(lines[1],"*/") == -1
-    assert event.has_multi_line_comm_end(lines[2],"*/") != -1
-    assert event.has_multi_line_comm_end(lines[3],"*/") != -1
-    assert event.has_multi_line_comm_end(lines[4],"*/") != -1
-    assert event.has_multi_line_comm_end(lines[5],"*/") == -1
-    assert event.has_multi_line_comm_end(lines[6],"*/") == -1
-'''
 
 def test_scanline():
     line = "\t \n"
@@ -125,5 +83,41 @@ def test_scanfile():
     token_table = event.scanfile(lines)
     assert event.state == Event.State.DEFAULT
     print(token_table)
+'''
 
+def test_match_token():
+    event = Event('//', '/*', '*/')
 
+    line = "int main() // Main function"
+    current_idx = 11
+    new_idx = event.match_token(line, current_idx, '//')
+    assert new_idx == 13
+
+    line = 'char *s = "String";'
+    current_idx = 10
+    new_idx = event.match_token(line, current_idx, '"')
+    assert new_idx == 11
+
+    line = "/* A Multiline Comment */"
+    current_idx = 0
+    new_idx = event.match_token(line, current_idx, '/*')
+    assert new_idx == 2
+
+    current_idx = 23
+    new_idx = event.match_token(line, current_idx, '*/')
+    assert new_idx == 25
+
+def test_scanTokens():
+    event = Event('//', '/*', '*/')
+
+    line = "// /* */"
+    tokens = event.scanTokens(line)
+    print(tokens)
+
+    line = "int a; // This is a variable /*"
+    tokens = event.scanTokens(line)
+    print(tokens)
+
+    line = "/**///"
+    tokens = event.scanTokens(line)
+    print(tokens)
