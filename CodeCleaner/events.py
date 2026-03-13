@@ -6,6 +6,7 @@
 
 from enum import Enum
 
+''' Modifying the Tokens to make it work with scanTokens()
 class Token(Enum):
     EMPTY_LINE = 1
     SINGLE_COMM = 2
@@ -13,6 +14,13 @@ class Token(Enum):
     MULTI_LINE_COMM_END = 4 
     STRING_START = 5 # Adding this bcz we don't want to erase comments inside strings
     STRING_END = 6 # can span over multiple lines
+'''
+class Token(Enum):
+    EMPTY_LINE = 1
+    SINGLE_COMM = 2
+    MULTI_LINE_COMM_START = 3
+    MULTI_LINE_COMM_END = 4 
+    STRING = 5 # making string have a single token 
 
 class Event(object):
 
@@ -22,12 +30,13 @@ class Event(object):
         IN_MULTI_LINE_COMM = 3
         
     def __init__(self,single_comm_marker,multi_line_comm_start_marker, 
-                 multi_line_comm_end_marker):
+                 multi_line_comm_end_marker, string_marker):
         self.state = Event.State.DEFAULT # used to monitor when inside string we ignore scanning
         # TODO : Allowing different types of comments to be processed
         self.comment_markers = {Token.SINGLE_COMM : single_comm_marker,
                                 Token.MULTI_LINE_COMM_START : multi_line_comm_start_marker,
-                                Token.MULTI_LINE_COMM_END : multi_line_comm_end_marker}
+                                Token.MULTI_LINE_COMM_END : multi_line_comm_end_marker,
+                                Token.STRING : string_marker}
     '''
     def __init__(self):
         self.state = Event.State.DEFAULT # used to monitor when inside multiline comm or string
@@ -82,7 +91,7 @@ class Event(object):
                         pass
 
         return tokens
-
+    '''
     def scanfile(self, lines) -> list[tuple[int, list[tuple[int, Token]]]]:
         # Generates a token table for the whole file
         token_table = []
@@ -90,10 +99,18 @@ class Event(object):
             token_table.append((idx,self.scanline(line)))
 
         return token_table
-        
+    '''
+    # Modifying scanfile function to use scanTokens() function
+    def scanfile(self, lines) -> list[tuple[int, list[tuple[int, Token]]]]:
+        # Generates a token table for the whole file
+        token_table = []
+        for idx,line in enumerate(lines):
+            token_table.append((idx,self.scanTokens(line)))
+
+        return token_table
 
     # Function to match characters
-    def match_token(self, line, idx, marker) -> int:
+    def match_marker(self, line, idx, marker) -> int:
         if marker is None:
             return idx
 
@@ -120,7 +137,8 @@ class Event(object):
         while idx < len(line):
             token_found = False
             for token, marker in self.comment_markers.items():
-                new_idx = self.match_token(line, idx, marker) # generates a new index after skipping chars
+
+                new_idx = self.match_marker(line, idx, marker) # generates a new index after skipping chars
                 if idx != new_idx:
                     if self.state == Event.State.DEFAULT:
                         if token == Token.MULTI_LINE_COMM_START:
@@ -129,16 +147,24 @@ class Event(object):
                         elif token == Token.SINGLE_COMM:
                             tokens.append((idx, token))
                             single_comm_found = True
+                        elif token == Token.STRING:
+                            tokens.append((idx, token))
+                            self.state = Event.State.IN_STRING
                     elif self.state == Event.State.IN_MULTI_LINE_COMM:
                         if token == Token.MULTI_LINE_COMM_END:
+                            tokens.append((idx, token))
+                            self.state = Event.State.DEFAULT
+                    elif self.state == Event.State.IN_STRING:
+                        if token == Token.STRING:
                             tokens.append((idx, token))
                             self.state = Event.State.DEFAULT
 
                     idx = new_idx # update to new index when tokens are matched 
                     token_found = True
                     break
-
-            if single_comm_found: # We break out of the loop the moment we find a single line comment
+            
+            # We break out of the loop the moment we find a single line comment
+            if single_comm_found:                
                 break
             if not token_found:
                 idx += 1 # increment loop if no token matched

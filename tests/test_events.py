@@ -85,39 +85,47 @@ def test_scanfile():
     print(token_table)
 '''
 
-def test_match_token():
-    event = Event('//', '/*', '*/')
+def test_match_marker():
+    event = Event('//', '/*', '*/', '"')
 
     line = "int main() // Main function"
     current_idx = 11
-    new_idx = event.match_token(line, current_idx, '//')
+    new_idx = event.match_marker(line, current_idx, '//')
     assert new_idx == 13
 
     line = 'char *s = "String";'
     current_idx = 10
-    new_idx = event.match_token(line, current_idx, '"')
+    new_idx = event.match_marker(line, current_idx, '"')
     assert new_idx == 11
 
     line = "/* A Multiline Comment */"
     current_idx = 0
-    new_idx = event.match_token(line, current_idx, '/*')
+    new_idx = event.match_marker(line, current_idx, '/*')
     assert new_idx == 2
 
     current_idx = 23
-    new_idx = event.match_token(line, current_idx, '*/')
+    new_idx = event.match_marker(line, current_idx, '*/')
     assert new_idx == 25
 
 def test_scanTokens():
-    event = Event('//', '/*', '*/')
+    event = Event('//', '/*', '*/', '"')
 
     line = "// /* */"
     tokens = event.scanTokens(line)
-    print(tokens)
+    #print(tokens)
 
     line = "int a; // This is a variable /*"
     tokens = event.scanTokens(line)
-    print(tokens)
+    #print(tokens)
 
     line = "/**///"
     tokens = event.scanTokens(line)
+    #print(tokens)
+
+    line = 'char *s = "String";'
+    tokens = event.scanTokens(line)
     print(tokens)
+
+    line = 'char s[10] = "Shane"; /* String */ // single comment'
+    tokens = event.scanTokens(line)
+    #print(tokens)

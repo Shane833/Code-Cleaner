@@ -11,7 +11,8 @@ class Parser(object):
     def __init__(self,lines): # Will take a file obj to parse through
         self.lines = lines
         self.event_table = None
-        self.event = Event()
+        # self.event = Event() modifying as per the new 
+        self.event = Event('//', '/*', '*/', '"')
         self.state = Parser.State.DEFAULT
         self.multi_line_comm_start = None
         self.multi_line_comm_end = None
@@ -21,7 +22,7 @@ class Parser(object):
 
     def clean_file(self) -> []:
         self.remove_comments()
-        self.format()
+        #self.format()
 
         return self.lines
 
@@ -78,15 +79,26 @@ class Parser(object):
         self.multi_line_comm_start = None
         self.multi_line_comm_end = None
 
-
+    ''' TEMP : modifying function for new scanTokens()
     def __fill_line(self, line_no, start, end):
         line = list(self.lines[line_no])
+        # fill up the characters inside the multi line comments with empty spaces 
         for i in range(start, end+1):
             line[i] = " "
 
-        self.lines[line_no] = "".join(line)
+        self.lines[line_no] = "".join(line) # replacing the old line with the modified one
+    '''
+    def __fill_line(self, line_no, start, end):
+        line = list(self.lines[line_no])
+        # fill up the characters inside the multi line comments with empty spaces 
+        # updating the end to be end + size of multiline comment end
+        end_idx = end + len(self.event.comment_markers[Token.MULTI_LINE_COMM_END])
+        #print(f"End : {end}, End_Idx : {end_idx}")
+        for i in range(start, end_idx):
+            line[i] = " "
 
-        
+        self.lines[line_no] = "".join(line) # replacing the old line with the modified one   
+
     def print_lines(self):
         for line in self.lines:
             print(line, end="")
