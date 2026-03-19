@@ -22,7 +22,7 @@ class Parser(object):
 
     def clean_file(self) -> []:
         self.remove_comments()
-        #self.format()
+        self.format()
 
         return self.lines
 
@@ -37,9 +37,11 @@ class Parser(object):
                         new_line = f"{new_line}\n"
                         self.lines[line_no] = new_line
                         #TODO: I'm not really making use of states, so do that
+
                     elif token == Token.MULTI_LINE_COMM_START:
                         self.state = Parser.State.IN_MULTI_LINE_COMM
                         self.multi_line_comm_start = (line_no, idx)
+
                     elif token == Token.MULTI_LINE_COMM_END:
                         self.multi_line_comm_end = (line_no, idx)
                         self.__service_multi_line_comm()
@@ -65,16 +67,20 @@ class Parser(object):
         end_line = self.multi_line_comm_end[0]
         start_idx = self.multi_line_comm_start[1]
         end_idx = self.multi_line_comm_end[1]
+
+        #updating end_idx
+        end_idx = end_idx + len(self.event.comment_markers[Token.MULTI_LINE_COMM_END])
         
         #TODO: Get rid of as many constants/fixed no.s like the ' - 2' at the end
         # On the same line
         if start_line == end_line:
             self.__fill_line(start_line, start_idx, end_idx)
         else:
-            self.__fill_line(start_line, start_idx, len(self.lines[start_line]) - 2) # 2 bcz don't want to get rid of the \n character at the end of the file
+            self.__fill_line(start_line, start_idx, len(self.lines[start_line]) - 1) # 1 bcz don't want to get rid of the \n character at the end of the file
             self.__fill_line(end_line, 0, end_idx)
+            # Taking care of all lines in between
             for line_no in range(start_line + 1, end_line):
-                self.__fill_line(line_no, 0, len(self.lines[line_no]) - 2)
+                self.__fill_line(line_no, 0, len(self.lines[line_no]) - 1)
 
         self.multi_line_comm_start = None
         self.multi_line_comm_end = None
@@ -92,21 +98,16 @@ class Parser(object):
         line = list(self.lines[line_no])
         # fill up the characters inside the multi line comments with empty spaces 
         # updating the end to be end + size of multiline comment end
-        end_idx = end + len(self.event.comment_markers[Token.MULTI_LINE_COMM_END])
-        #print(f"End : {end}, End_Idx : {end_idx}")
-        for i in range(start, end_idx):
+        # end_idx = end + len(self.event.comment_markers[Token.MULTI_LINE_COMM_END])
+        # But this is wrong behaviour as this should be independent of the different comment lens
+        '''for i in range(start, end_idx):
             line[i] = " "
-
+        '''
+        for i in range(start, end):
+            line[i] = " "
         self.lines[line_no] = "".join(line) # replacing the old line with the modified one   
 
     def print_lines(self):
         for line in self.lines:
             print(line, end="")
                         
-
-                
-
-        
-
-
-

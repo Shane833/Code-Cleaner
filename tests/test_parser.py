@@ -1,9 +1,6 @@
 from CodeCleaner.parser import Parser
 
 '''
-file = open('CodeCleaner/hashmap.c')
-parser = Parser(file.readlines())
-
 def test_parser():
     parser.clean_file()
     parser.print_lines()
@@ -20,3 +17,11 @@ def test_parser():
     parser = Parser(lines)
     parser.clean_file()
     parser.print_lines()
+
+    file = open('tests/test.h')
+    lines = file.readlines()
+    parser = Parser(lines)
+    parser.clean_file()
+    parser.print_lines()
+    file.close()
+    

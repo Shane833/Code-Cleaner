@@ -2,3 +2,6 @@
 name = "CodeCleaner"
 version = "0.1.0"
 dependencies = ["pytest"]
+
+[project.scripts]
+ccleaner = "CodeCleaner.ccleaner:main"

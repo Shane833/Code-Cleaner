@@ -112,20 +112,27 @@ def test_scanTokens():
 
     line = "// /* */"
     tokens = event.scanTokens(line)
-    #print(tokens)
+    assert tokens == [(0, Token.SINGLE_COMM)]
 
     line = "int a; // This is a variable /*"
     tokens = event.scanTokens(line)
-    #print(tokens)
+    assert tokens == [(7, Token.SINGLE_COMM)]
 
     line = "/**///"
     tokens = event.scanTokens(line)
-    #print(tokens)
-
+    assert tokens == [(0, Token.MULTI_LINE_COMM_START),
+                      (2, Token.MULTI_LINE_COMM_END),
+                      (4, Token.SINGLE_COMM)]
+    
     line = 'char *s = "String";'
     tokens = event.scanTokens(line)
-    print(tokens)
-
+    assert tokens == [(10, Token.STRING),
+                      (17, Token.STRING)]
+    
     line = 'char s[10] = "Shane"; /* String */ // single comment'
     tokens = event.scanTokens(line)
-    #print(tokens)
+    assert tokens == [(13, Token.STRING),
+                      (19, Token.STRING),
+                      (22, Token.MULTI_LINE_COMM_START),
+                      (32, Token.MULTI_LINE_COMM_END),
+                      (35, Token.SINGLE_COMM)]

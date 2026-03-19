@@ -45,7 +45,7 @@ class Event(object):
     def is_empty_line(self,line) -> bool:
         '''go through the line and determines if its just for formatting'''
         return line.strip() == "" # simple way, i.e. after removing all the whitespace if we are left with nothing then its an empty line
-
+    '''
     #TODO: The function name doesn't suggest what it really does
     def peek_and_match(self, index, line, marker) -> bool:
         # since at the end of the file a new line char is always present
@@ -53,7 +53,8 @@ class Event(object):
         # But there was a bug bcz I didn't handle the when we start reaching
         # the end of line and encounter 
         return line[index + 1] == marker if index + 1 < len(line) else False 
-
+    ''' 
+    '''
     def scanline(self, line) -> list[tuple[int, Token]]:
         tokens = []
         # Scan for empty line
@@ -91,6 +92,7 @@ class Event(object):
                         pass
 
         return tokens
+    '''
     '''
     def scanfile(self, lines) -> list[tuple[int, list[tuple[int, Token]]]]:
         # Generates a token table for the whole file
@@ -134,39 +136,46 @@ class Event(object):
         tokens = []
         single_comm_found = False # Flag for breaking out of the loop
 
-        while idx < len(line):
-            token_found = False
-            for token, marker in self.comment_markers.items():
+        # Scan for an empty line
+        if self.is_empty_line(line):
+            tokens.append((0, Token.EMPTY_LINE))
+        # Else look for other characters
+        else:
+            while idx < len(line):
+                token_found = False
+                for token, marker in self.comment_markers.items():
 
-                new_idx = self.match_marker(line, idx, marker) # generates a new index after skipping chars
-                if idx != new_idx:
-                    if self.state == Event.State.DEFAULT:
-                        if token == Token.MULTI_LINE_COMM_START:
-                            self.state = Event.State.IN_MULTI_LINE_COMM
-                            tokens.append((idx, token))
-                        elif token == Token.SINGLE_COMM:
-                            tokens.append((idx, token))
-                            single_comm_found = True
-                        elif token == Token.STRING:
-                            tokens.append((idx, token))
-                            self.state = Event.State.IN_STRING
-                    elif self.state == Event.State.IN_MULTI_LINE_COMM:
-                        if token == Token.MULTI_LINE_COMM_END:
-                            tokens.append((idx, token))
-                            self.state = Event.State.DEFAULT
-                    elif self.state == Event.State.IN_STRING:
-                        if token == Token.STRING:
-                            tokens.append((idx, token))
-                            self.state = Event.State.DEFAULT
+                    new_idx = self.match_marker(line, idx, marker) # generates a new index after skipping chars
+                    if idx != new_idx:
+                        if self.state == Event.State.DEFAULT:
+                            if token == Token.MULTI_LINE_COMM_START:
+                                self.state = Event.State.IN_MULTI_LINE_COMM
+                                tokens.append((idx, token))
+                            elif token == Token.SINGLE_COMM:
+                                tokens.append((idx, token))
+                                single_comm_found = True
+                            elif token == Token.STRING:
+                                tokens.append((idx, token))
+                                self.state = Event.State.IN_STRING
 
-                    idx = new_idx # update to new index when tokens are matched 
-                    token_found = True
+                        elif self.state == Event.State.IN_MULTI_LINE_COMM:
+                            if token == Token.MULTI_LINE_COMM_END:
+                                tokens.append((idx, token))
+                                self.state = Event.State.DEFAULT
+
+                        elif self.state == Event.State.IN_STRING:
+                            if token == Token.STRING:
+                                tokens.append((idx, token))
+                                self.state = Event.State.DEFAULT
+
+                        idx = new_idx # update to new index when tokens are matched 
+                        token_found = True
+                        break
+                
+                # We break out of the loop the moment we find a single line comment
+                if single_comm_found:                
                     break
-            
-            # We break out of the loop the moment we find a single line comment
-            if single_comm_found:                
-                break
-            if not token_found:
-                idx += 1 # increment loop if no token matched
+                if not token_found:
+                    idx += 1 # increment loop if no token matched
 
         return tokens
