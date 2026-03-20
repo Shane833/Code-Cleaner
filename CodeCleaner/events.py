@@ -113,19 +113,20 @@ class Event(object):
 
     # Function to match characters
     def match_marker(self, line, idx, marker) -> int:
+        ''' Returns a new index by skipping over the matched marker
+            else returns the same index '''
         if marker is None:
             return idx
 
         line_length = len(line)
         marker_length = len(marker)
-
+        
+        # Index out of bounds check
         if idx + (marker_length - 1) >= line_length: # subtract 1 to convert size to index
-            #print("Index Out of Bounds")
             return idx
-        else:
+        else: # If marker didn't match
             for i in range(0, marker_length):
                 if line[idx + i] != marker[i]:
-                    #print("Char didn't match")
                     return idx
         
         return idx + marker_length

@@ -8,11 +8,10 @@ class Parser(object):
         IN_STRING = 2
         IN_MULTI_LINE_COMM = 3
  
-    def __init__(self,lines): # Will take a file obj to parse through
+    def __init__(self,markers,lines): # Will take a file obj to parse through
         self.lines = lines
         self.event_table = None
-        # self.event = Event() modifying as per the new 
-        self.event = Event('//', '/*', '*/', '"')
+        self.event = Event(markers[0], markers[1], markers[2], markers[3])
         self.state = Parser.State.DEFAULT
         self.multi_line_comm_start = None
         self.multi_line_comm_end = None

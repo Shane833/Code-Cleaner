@@ -2,89 +2,6 @@ import sys
 import pytest
 from CodeCleaner.events import *
 
-'''
-# creating an object of event
-event = Event()
-
-def test_scanline():
-    line = "\t \n"
-    event = Event()
-    result = event.scanline(line)
-    assert result == [(0, Token.EMPTY_LINE)]
-    
-    line = "//"
-    event = Event()
-    result = event.scanline(line)
-    assert result == [(0, Token.SINGLE_COMM)]
-
-    line = '"'
-    event = Event()
-    result = event.scanline(line)
-    assert event.state == Event.State.IN_STRING
-    assert result == [(0, Token.STRING_START)]
-    
-    line = "/*"
-    event = Event()
-    result = event.scanline(line)
-    assert event.state == Event.State.IN_MULTI_LINE_COMM
-    assert result == [(0, Token.MULTI_LINE_COMM_START)]
-
-    line = "/**/"
-    event = Event()
-    result = event.scanline(line)
-    assert event.state == Event.State.DEFAULT
-    assert result == [(0, Token.MULTI_LINE_COMM_START), (4, Token.MULTI_LINE_COMM_END)]
-
-    line = "// /* */"
-    event = Event()
-    result = event.scanline(line)
-    assert result == [(0, Token.SINGLE_COMM)]
-
-    line = "/* */ //"
-    event = Event()
-    result = event.scanline(line)
-    assert result == [(0, Token.MULTI_LINE_COMM_START),
-                      (5, Token.MULTI_LINE_COMM_END),
-                      (6, Token.SINGLE_COMM)]
-
-    line = 'char *s = "This is a string";'
-    event = Event()
-    result = event.scanline(line)
-    assert result == [(10, Token.STRING_START), (27, Token.STRING_END)]
-
-    line = '" /**/ // '
-    event = Event()
-    result = event.scanline(line)
-    assert event.state == Event.State.IN_STRING
-    assert result == [(0, Token.STRING_START)]
-    
-def test_scanfile():
-    event = Event()
-    lines = ['#include <stdio.h> // helps in I/O',
-             '#include <stdlib.h> /* provides memory related function */',
-             '  ',
-             'int main(){',
-             '\tint a; // This is a variable',
-             '}\n',
-             '']
-
-    token_table = event.scanfile(lines)
-    assert event.state == Event.State.DEFAULT
-    print(token_table)
-
-    lines = ["/* I going to span "," across lines */"]
-    token_table = event.scanfile(lines)
-    assert event.state == Event.State.DEFAULT
-    print(token_table)
-
-    lines = ['char *s = "This string will\'',
-             '\t\t\tis going span two lines"'
-             ]
-    token_table = event.scanfile(lines)
-    assert event.state == Event.State.DEFAULT
-    print(token_table)
-'''
-
 def test_match_marker():
     event = Event('//', '/*', '*/', '"')
 
@@ -107,7 +24,16 @@ def test_match_marker():
     new_idx = event.match_marker(line, current_idx, '*/')
     assert new_idx == 25
 
+    # Trying 
+    event = Event('#', None, None, None)
+
+    line = "a = 2 # This is a variable"
+    current_idx = 6
+    new_idx = event.match_marker(line, current_idx, '#')
+    assert new_idx == 7
+
 def test_scanTokens():
+    # C Family - C, C++, Java, JavaScript
     event = Event('//', '/*', '*/', '"')
 
     line = "// /* */"
@@ -136,3 +62,17 @@ def test_scanTokens():
                       (22, Token.MULTI_LINE_COMM_START),
                       (32, Token.MULTI_LINE_COMM_END),
                       (35, Token.SINGLE_COMM)]
+
+    # Python
+    event = Event('#', None, None, None)
+    line = "if a == 2: # check condition"
+    tokens = event.scanTokens(line)
+    assert tokens == [(11, Token.SINGLE_COMM)]
+
+    # HTML
+    event = Event(None, '<!--', '-->', None)
+    line = "<p>This is a text</p> <!-- This a comment -->"
+    tokens = event.scanTokens(line)
+    assert tokens == [(22, Token.MULTI_LINE_COMM_START),
+                      (42, Token.MULTI_LINE_COMM_END)]
+

@@ -1,30 +1,55 @@
 #!/usr/bin/env python3
 
+# TODO : Things to still implement
+# 1. Handle strings in python
+# 2. Handle escape characters
+
 from pathlib import Path
 from parser import Parser
 from enum import Enum
 import sys
 
-class Options(Enum):
+# define some exceptions
+class UnSupportedFileTypeError(Exception):
+    pass
+
+class Option(Enum):
     DEFAULT = 0
     OVERWRITE = 1
 
-class Languages(Enum):
+class Language(Enum):
     C_FAMILY = 1
+    PYTHON = 2
+    HTML = 3
 
-# Map the options
-options = {"-i": Options.OVERWRITE}
+# Mapping of options
+options = {"-i": Option.OVERWRITE}
 
-# Mapping of lanugaes
-languages = {".h" : Languages.C_FAMILY, ".c" : Languages.C_FAMILY,
-             ".cpp" : Languages.C_FAMILY, ".hpp": Languages.C_FAMILY}
+# Mapping of languages
+languages = {".h" : Language.C_FAMILY, ".c" : Language.C_FAMILY,
+             ".cpp" : Language.C_FAMILY, ".hpp": Language.C_FAMILY,
+             ".java" : Language.C_FAMILY, ".js" : Language.C_FAMILY,
+             ".py" : Language.PYTHON, ".html" : Language.HTML}
 
+# Mapping of markers for languages
+markers = {Language.C_FAMILY : ['//', '/*', '*/', '"'],
+          Language.PYTHON: ['#', None, None, None],
+          Language.HTML : [None, '<!--', '-->', None]}
+
+# Basic Util function
 def correctUsage():
-    print("USAGE : python ccleaner.py [OPTIONS] [FILES]")
+    logInfo("USAGE -> python ccleaner.py [OPTIONS] [FILES]")
 
+def logError(msg):
+    print(f"[ERROR] : {msg}")
+
+def logInfo(msg):
+    print(f"[INFO] : {msg}")
+
+# Command line Argument Handling
 def processArguments(arguments):
     file_paths = []
-    selected_option = Options.DEFAULT
+    selected_option = Option.DEFAULT
     
     if len(arguments) == 1:
         correctUsage()
@@ -43,7 +68,7 @@ def processArguments(arguments):
                 file_paths.append(arguments[i])
         
         if len(file_paths) == 0:
-            print("ERROR : No files provided!")
+            logError("No files provided!")
             correctUsage()
             exit(1)
 
@@ -60,17 +85,21 @@ def processFile(option, file_path):
         parent = path.parent
         # Source Code language to identify comment types
         lang_type = None
-
+        lang_markers = None
         # Find the source language using the extension
         if extension in languages.keys():
             lang_type = languages[extension]
-        # TODO: Make use of the extensions
+            lang_markers = markers[lang_type]
+
+        # Invalid file type 
+        if not lang_type:
+            raise UnSupportedFileTypeError()
 
         # Clean it
-        parser = Parser(file.readlines())
+        parser = Parser(lang_markers, file.readlines())
         cleaned_lines = parser.clean_file()
 
-        if option == Options.DEFAULT:
+        if option == Option.DEFAULT:
             # create a new file and write the cleaned data in it
             new_file_path = f"{parent}/{name}_cleaned{extension}"
             try:
@@ -78,20 +107,25 @@ def processFile(option, file_path):
                 new_file.writelines(cleaned_lines)
                 new_file.flush()
                 new_file.close()
+                logInfo(f"{new_file_path} GENERATED!")
             except:
-                print("UNKNOWN ERROR!")
+                logError("FAILED TO GENERATE FILE!")
 
-        elif option == Options.OVERWRITE:
+        elif option == Option.OVERWRITE:
             # make changes in the same file
             file.seek(0)
             file.truncate()
             file.writelines(cleaned_lines)
             file.flush()
-
+            logInfo(f"{file_path} CLEANED!")
         file.close()
 
     except FileNotFoundError:
-        print(f"ERROR : {file_path} file not found!")
+        logError(f"{file_path} FILE NOT FOUND!")
+    except UnSupportedFileTypeError:
+        logError(f"{file_path} UNSUPPORTED FILE TYPE!")
+        logInfo(f"{file_path} SKIPPED!")
+
 
 def main():
     option, file_paths = processArguments(sys.argv)

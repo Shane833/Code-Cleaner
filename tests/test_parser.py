@@ -14,14 +14,14 @@ def test_parser():
              '\tint a; // This is a variable\n',
              '}\n',
              '']
-    parser = Parser(lines)
+    parser = Parser(['//', '/*', '*/', '"'],lines)
     parser.clean_file()
-    parser.print_lines()
+    #parser.print_lines()
 
-    file = open('tests/test.h')
+    file = open('tests/testfiles/test.h')
     lines = file.readlines()
-    parser = Parser(lines)
+    parser = Parser(['//', '/*', '*/', '"'],lines)
     parser.clean_file()
-    parser.print_lines()
+    #parser.print_lines()
     file.close()
     
