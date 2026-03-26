@@ -35,7 +35,6 @@ class Parser(object):
                         new_line = self.lines[line_no][:idx]
                         new_line = f"{new_line}\n"
                         self.lines[line_no] = new_line
-                        #TODO: I'm not really making use of states, so do that
 
                     elif token == Token.MULTI_LINE_COMM_START:
                         self.state = Parser.State.IN_MULTI_LINE_COMM
@@ -48,7 +47,6 @@ class Parser(object):
 
     def format(self):
         # Second pass to remove unnecessary empty lines
-        # TODO: Currently popping from the list will render the pre saved indexes useless
         self.__generate_events()
         previous_event = None
         no_of_deleted_lines = 0 # acts like an offset for correcting the index
@@ -70,7 +68,7 @@ class Parser(object):
         #updating end_idx
         end_idx = end_idx + len(self.event.comment_markers[Token.MULTI_LINE_COMM_END])
         
-        #TODO: Get rid of as many constants/fixed no.s like the ' - 2' at the end
+        #TODO: Get rid of as many constants/fixed no.s like the ' -1' at the end
         # On the same line
         if start_line == end_line:
             self.__fill_line(start_line, start_idx, end_idx)
@@ -84,29 +82,18 @@ class Parser(object):
         self.multi_line_comm_start = None
         self.multi_line_comm_end = None
 
-    ''' TEMP : modifying function for new scanTokens()
-    def __fill_line(self, line_no, start, end):
-        line = list(self.lines[line_no])
-        # fill up the characters inside the multi line comments with empty spaces 
-        for i in range(start, end+1):
-            line[i] = " "
-
-        self.lines[line_no] = "".join(line) # replacing the old line with the modified one
-    '''
     def __fill_line(self, line_no, start, end):
         line = list(self.lines[line_no])
         # fill up the characters inside the multi line comments with empty spaces 
         # updating the end to be end + size of multiline comment end
         # end_idx = end + len(self.event.comment_markers[Token.MULTI_LINE_COMM_END])
         # But this is wrong behaviour as this should be independent of the different comment lens
-        '''for i in range(start, end_idx):
-            line[i] = " "
-        '''
         for i in range(start, end):
             line[i] = " "
         self.lines[line_no] = "".join(line) # replacing the old line with the modified one   
-
+    
+    '''
     def print_lines(self):
         for line in self.lines:
             print(line, end="")
-                        
+    '''                    

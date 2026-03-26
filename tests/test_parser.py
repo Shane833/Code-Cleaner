@@ -14,14 +14,21 @@ def test_parser():
              '\tint a; // This is a variable\n',
              '}\n',
              '']
+    cleaned_lines = ['#include <stdio.h> \n',
+                     '#include <stdlib.h> \n',
+                     '  \n',
+                     'int main(){\n',
+                     '\tint a; \n',
+                     '}\n',
+                     '']
     parser = Parser(['//', '/*', '*/', '"'],lines)
-    parser.clean_file()
-    #parser.print_lines()
-
+    new_lines = parser.clean_file()
+    assert new_lines == cleaned_lines
+    '''
     file = open('tests/testfiles/test.h')
     lines = file.readlines()
     parser = Parser(['//', '/*', '*/', '"'],lines)
     parser.clean_file()
     #parser.print_lines()
     file.close()
-    
+    ''' 

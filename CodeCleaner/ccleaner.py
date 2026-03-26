@@ -3,6 +3,7 @@
 # TODO : Things to still implement
 # 1. Handle strings in python
 # 2. Handle escape characters
+# 3. Handle multile languages within a single html file
 
 from pathlib import Path
 from parser import Parser
@@ -21,6 +22,7 @@ class Language(Enum):
     C_FAMILY = 1
     PYTHON = 2
     HTML = 3
+    CSS = 4
 
 # Mapping of options
 options = {"-i": Option.OVERWRITE}
@@ -29,16 +31,19 @@ options = {"-i": Option.OVERWRITE}
 languages = {".h" : Language.C_FAMILY, ".c" : Language.C_FAMILY,
              ".cpp" : Language.C_FAMILY, ".hpp": Language.C_FAMILY,
              ".java" : Language.C_FAMILY, ".js" : Language.C_FAMILY,
-             ".py" : Language.PYTHON, ".html" : Language.HTML}
+             ".py" : Language.PYTHON, ".html" : Language.HTML,
+             ".css" : Language.CSS}
 
 # Mapping of markers for languages
+# Value : makers for single line comment, multi line comment start, multi line comment end, string respectively
 markers = {Language.C_FAMILY : ['//', '/*', '*/', '"'],
-          Language.PYTHON: ['#', None, None, None],
-          Language.HTML : [None, '<!--', '-->', None]}
+           Language.PYTHON: ['#', None, None, None],
+           Language.HTML : [None, '<!--', '-->', None],
+           Language.CSS : [None, '/*', '*/', None]}
 
-# Basic Util function
+# Basic utility function
 def correctUsage():
-    logInfo("USAGE -> python ccleaner.py [OPTIONS] [FILES]")
+    print("USAGE : python ccleaner.py [OPTIONS] [FILES]")
 
 def logError(msg):
     print(f"[ERROR] : {msg}")
@@ -118,6 +123,7 @@ def processFile(option, file_path):
             file.writelines(cleaned_lines)
             file.flush()
             logInfo(f"{file_path} CLEANED!")
+
         file.close()
 
     except FileNotFoundError:
@@ -126,7 +132,7 @@ def processFile(option, file_path):
         logError(f"{file_path} UNSUPPORTED FILE TYPE!")
         logInfo(f"{file_path} SKIPPED!")
 
-
+# Entry point
 def main():
     option, file_paths = processArguments(sys.argv)
 
