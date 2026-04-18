@@ -32,7 +32,7 @@ class Parser(object):
             if len(event) != 0: # Only enter if it contains any real comment data
                 for idx, token in event:
                     if token == Token.SINGLE_COMM:
-                        new_line = self.lines[line_no][:idx]
+                        new_line = self.lines[line_no][:idx] # anything after idx(//) is not required
                         new_line = f"{new_line}\n"
                         self.lines[line_no] = new_line
 
@@ -78,7 +78,7 @@ class Parser(object):
             # Taking care of all lines in between
             for line_no in range(start_line + 1, end_line):
                 self.__fill_line(line_no, 0, len(self.lines[line_no]) - 1)
-
+        # Reset them for next multi line comment
         self.multi_line_comm_start = None
         self.multi_line_comm_end = None
 

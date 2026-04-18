@@ -2,7 +2,7 @@
 
 # TODO : Things to still implement
 # 1. Handle strings in python
-# 2. Handle escape characters
+# 2. Handle escape characters in strings
 # 3. Handle multile languages within a single html file
 
 from pathlib import Path
@@ -125,12 +125,11 @@ def processFile(option, file_path):
             logInfo(f"{file_path} CLEANED!")
 
         file.close()
-
+    
     except FileNotFoundError:
         logError(f"{file_path} FILE NOT FOUND!")
     except UnSupportedFileTypeError:
-        logError(f"{file_path} UNSUPPORTED FILE TYPE!")
-        logInfo(f"{file_path} SKIPPED!")
+        logError(f"{file_path} UNSUPPORTED FILE TYPE! SKIPPED!")
 
 # Entry point
 def main():
