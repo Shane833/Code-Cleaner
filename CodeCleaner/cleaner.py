@@ -39,7 +39,7 @@ def is_empty_line(line) -> bool:
 		if l not in characters:
 			return False
 		else:
-			pass
+			pass #TEST
 	return True
 
 
