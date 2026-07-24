@@ -5,3 +5,6 @@ tags
 
 CodeCleaner/cleaner.py
 
+/CodeCleaner.egg-info
+
+docs

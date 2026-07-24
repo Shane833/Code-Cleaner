@@ -2,7 +2,8 @@
 A simple CLI tool for removing comments from source code
 
 ## **Usage**
-> **python ccleaner.py [options] [filepath(s)]**
+> install the package using "pip install ." or equivalent call from the package manager of your choosing
+> **ccleaner [options] [filepath(s)]**
 
 ### options
 | Option |               Output                  |
@@ -24,7 +25,7 @@ A simple CLI tool for removing comments from source code
 - [x] Handle variable character single line comment
 - [x] Handle variable character multi line comment
 - [x] Provide way to generate a new file or make changes in the same file
-- [ ] Provide options for inidividual files
+- [x] Provide options for inidividual files
 - [x] Add multi-language support
 - [ ] To take input along with file, the line no. start/range you would like to clean up
 - [ ] Add regular expression for multiple files and recursion for a directory

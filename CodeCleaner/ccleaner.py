@@ -6,7 +6,7 @@
 # 3. Handle multile languages within a single html file
 
 from pathlib import Path
-from parser import Parser
+from CodeCleaner.parser import Parser
 from enum import Enum
 import sys
 
