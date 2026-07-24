@@ -2,8 +2,8 @@
 A simple CLI tool for removing comments from source code
 
 ## **Usage**
-> install the package using "pip install ." or equivalent call from the package manager of your choosing
-> **ccleaner [options] [filepath(s)]**
+- install the package using "pip install ." or equivalent call from the package manager of your choosing
+- **ccleaner [options] [filepath(s)]**
 
 ### options
 | Option |               Output                  |
